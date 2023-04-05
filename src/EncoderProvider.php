@@ -5,14 +5,16 @@ declare(strict_types=1);
 namespace Yethee\Tiktoken;
 
 use InvalidArgumentException;
+use Symfony\Contracts\Service\ResetInterface;
 use Yethee\Tiktoken\Vocab\Loader\DefaultVocabLoader;
+use Yethee\Tiktoken\Vocab\Vocab;
 use Yethee\Tiktoken\Vocab\VocabLoader;
 
 use function getenv;
 use function sprintf;
 use function str_starts_with;
 
-final class EncoderProvider
+final class EncoderProvider implements ResetInterface
 {
     private const ENCODINGS = [
         'r50k_base' => [
@@ -76,6 +78,9 @@ final class EncoderProvider
     /** @var array<non-empty-string, Encoder> */
     private array $encoders = [];
 
+    /** @var array<string, Vocab> */
+    private array $vocabs = [];
+
     public function __construct()
     {
         $cacheDir = getenv('TIKTOKEN_CACHE_DIR');
@@ -115,7 +120,7 @@ final class EncoderProvider
 
             return $this->encoders[$encodingName] = new Encoder(
                 $encodingName,
-                $this->getVocabLoader()->load($options['vocab']),
+                $this->getVocab($encodingName),
                 $options['pat'],
             );
         }
@@ -136,12 +141,24 @@ final class EncoderProvider
         $this->vocabLoader = $loader;
     }
 
-    private function getVocabLoader(): VocabLoader
+    public function reset(): void
     {
-        if ($this->vocabLoader !== null) {
-            return $this->vocabLoader;
+        $this->encoders = [];
+        $this->vocabs = [];
+    }
+
+    private function getVocab(string $encodingName): Vocab
+    {
+        if (isset($this->vocabs[$encodingName])) {
+            return $this->vocabs[$encodingName];
         }
 
-        return $this->vocabLoader = new DefaultVocabLoader($this->vocabCacheDir);
+        $loader = $this->vocabLoader;
+
+        if ($loader === null) {
+            $loader = $this->vocabLoader = new DefaultVocabLoader($this->vocabCacheDir);
+        }
+
+        return $this->vocabs[$encodingName] = $loader->load(self::ENCODINGS[$encodingName]['vocab']);
     }
 }

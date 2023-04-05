@@ -4,7 +4,8 @@
   "license": "MIT",
   "description": "PHP version of tiktoken",
   "require": {
-    "php": "^8.1"
+    "php": "^8.1",
+    "symfony/service-contracts": "^2.5 || ^3.0"
   },
   "require-dev": {
     "doctrine/coding-standard": "^11.1",
