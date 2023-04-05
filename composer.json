@@ -9,7 +9,6 @@
   },
   "require-dev": {
     "doctrine/coding-standard": "^11.1",
-    "php-vcr/php-vcr": "^1.5",
     "phpunit/phpunit": "^10.0",
     "psalm/plugin-phpunit": "^0.18.3",
     "vimeo/psalm": "5.9.0"
