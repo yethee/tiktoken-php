@@ -1,0 +1,10 @@
+/.cache export-ignore
+/tests export-ignore
+/.editorconfig export-ignore
+/.gitattributes export-ignore
+/.gitignore export-ignore
+/*.xml export-ignore
+/*.xml.dist export-ignore
+
+# Auto detect text files and perform LF normalization
+* text=auto

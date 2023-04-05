@@ -1,0 +1,43 @@
+{
+  "name": "yethee/tiktoken",
+  "type": "library",
+  "license": "MIT",
+  "description": "PHP version of tiktoken",
+  "require": {
+    "php": "^8.1"
+  },
+  "require-dev": {
+    "doctrine/coding-standard": "^11.1",
+    "php-vcr/php-vcr": "^1.5",
+    "phpunit/phpunit": "^10.0",
+    "psalm/plugin-phpunit": "^0.18.3",
+    "vimeo/psalm": "5.9.0"
+  },
+  "autoload": {
+    "psr-4": {
+      "Yethee\\Tiktoken\\": "src"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "Yethee\\Tiktoken\\Tests\\": "tests"
+    }
+  },
+  "config": {
+    "sort-packages": true,
+    "allow-plugins": {
+      "dealerdirect/phpcodesniffer-composer-installer": true
+    }
+  },
+  "scripts": {
+    "check": [
+      "@cs-check",
+      "@analyse",
+      "@test"
+    ],
+    "analyse": "psalm --stats",
+    "cs-check": "phpcs",
+    "cs-fix": "phpcbf",
+    "test": "phpunit --colors=always"
+  }
+}

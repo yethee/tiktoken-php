@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/10.0/phpunit.xsd"
+         bootstrap="vendor/autoload.php"
+         cacheResultFile=".cache/phpunit/test-results"
+         executionOrder="depends,defects"
+         beStrictAboutCoverageMetadata="true"
+         beStrictAboutOutputDuringTests="true"
+         beStrictAboutTodoAnnotatedTests="true"
+         failOnRisky="true"
+         failOnWarning="true">
+  <testsuites>
+    <testsuite name="Test Suite">
+      <directory>tests/</directory>
+    </testsuite>
+  </testsuites>
+
+  <coverage cacheDirectory=".cache/phpunit/code-coverage">
+    <include>
+      <directory suffix=".php">src/</directory>
+    </include>
+  </coverage>
+</phpunit>
