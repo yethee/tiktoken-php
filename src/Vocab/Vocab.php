@@ -12,6 +12,7 @@ use Yethee\Tiktoken\Exception\ParseError;
 use Yethee\Tiktoken\Util\EncodeUtil;
 
 use function array_flip;
+use function array_map;
 use function assert;
 use function base64_decode;
 use function count;
@@ -24,6 +25,7 @@ use function implode;
 use function rewind;
 use function sprintf;
 use function stream_get_meta_data;
+use function strval;
 
 /** @psalm-import-type NonEmptyByteVector from EncodeUtil */
 final class Vocab implements Countable
@@ -39,7 +41,7 @@ final class Vocab implements Countable
     {
         $this->tokenToRankMap = $tokenRankMap;
         /** @psalm-suppress PropertyTypeCoercion */
-        $this->rankToTokenMap = array_flip($tokenRankMap);
+        $this->rankToTokenMap = array_map(strval(...), array_flip($tokenRankMap));
 
         if (count($this->tokenToRankMap) !== count($this->rankToTokenMap)) {
             throw new InvalidArgumentException('The map of tokens and ranks has duplicates of rank');
