@@ -12,18 +12,14 @@ use Yethee\Tiktoken\Exception\ParseError;
 use Yethee\Tiktoken\Util\EncodeUtil;
 
 use function array_flip;
-use function array_map;
 use function assert;
 use function base64_decode;
-use function bin2hex;
 use function count;
-use function dechex;
 use function explode;
 use function fclose;
 use function fgets;
 use function file_exists;
 use function fopen;
-use function hex2bin;
 use function implode;
 use function rewind;
 use function sprintf;
@@ -43,7 +39,7 @@ final class Vocab implements Countable
     {
         $this->tokenToRankMap = $tokenRankMap;
         /** @psalm-suppress PropertyTypeCoercion */
-        $this->rankToTokenMap = array_map(hex2bin(...), array_flip($tokenRankMap));
+        $this->rankToTokenMap = array_flip($tokenRankMap);
 
         if (count($this->tokenToRankMap) !== count($this->rankToTokenMap)) {
             throw new InvalidArgumentException('The map of tokens and ranks has duplicates of rank');
@@ -97,7 +93,7 @@ final class Vocab implements Countable
 
             assert($token !== '');
 
-            $map[bin2hex($token)] = (int) $rank;
+            $map[$token] = (int) $rank;
 
             $line = fgets($stream);
             $lineNo++;
@@ -109,10 +105,7 @@ final class Vocab implements Countable
     /** @psalm-param NonEmptyByteVector $bytes */
     public function tryGetRank(array $bytes): int|null
     {
-        $token = implode(array_map(dechex(...), $bytes));
-        assert($token !== '');
-
-        return $this->tokenToRankMap[$token] ?? null;
+        return $this->tokenToRankMap[EncodeUtil::fromBytes($bytes)] ?? null;
     }
 
     /**
@@ -122,10 +115,7 @@ final class Vocab implements Countable
      */
     public function getRank(array $bytes): int
     {
-        $token = implode(array_map(dechex(...), $bytes));
-        assert($token !== '');
-
-        return $this->tokenToRankMap[$token] ?? throw new OutOfBoundsException(sprintf(
+        return $this->tokenToRankMap[EncodeUtil::fromBytes($bytes)] ?? throw new OutOfBoundsException(sprintf(
             'No rank for bytes vector: [%s]',
             implode(', ', $bytes),
         ));

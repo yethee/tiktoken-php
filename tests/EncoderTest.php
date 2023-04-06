@@ -33,6 +33,11 @@ final class EncoderTest extends TestCase
             [9468, 234, 114],
             $encoder->encode('🌶'),
         );
+
+        self::assertSame(
+            [627],
+            $encoder->encode(".\n"),
+        );
     }
 
     public function testDecode(): void
@@ -47,5 +52,6 @@ final class EncoderTest extends TestCase
         self::assertSame('hello world', $encoder->decode([15339, 1917]));
         self::assertSame('привет мир', $encoder->decode([8164, 2233, 28089, 8341, 11562, 78746]));
         self::assertSame('🌶', $encoder->decode([9468, 234, 114]));
+        self::assertSame(".\n", $encoder->decode([627]));
     }
 }

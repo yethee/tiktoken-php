@@ -3,9 +3,11 @@
   <file src="src/Util/EncodeUtil.php">
     <LessSpecificReturnStatement>
       <code>array_map(hexdec(...), str_split(bin2hex($text), 2))</code>
+      <code><![CDATA[pack('C*', ...$bytes)]]></code>
     </LessSpecificReturnStatement>
     <MoreSpecificReturnType>
       <code>NonEmptyByteVector</code>
+      <code>non-empty-string</code>
     </MoreSpecificReturnType>
   </file>
 </files>
