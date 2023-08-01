@@ -12,7 +12,6 @@ use Yethee\Tiktoken\Exception\ParseError;
 use Yethee\Tiktoken\Util\EncodeUtil;
 
 use function array_flip;
-use function array_map;
 use function assert;
 use function base64_decode;
 use function count;
@@ -30,18 +29,21 @@ use function strval;
 /** @psalm-import-type NonEmptyByteVector from EncodeUtil */
 final class Vocab implements Countable
 {
-    /** @var array<non-empty-string, int> */
-    private array $tokenToRankMap;
+    /** @var array<string, int> */
+    private $tokenToRankMap;
 
     /** @var array<int, non-empty-string> */
-    private array $rankToTokenMap;
+    private $rankToTokenMap;
 
     /** @param array<non-empty-string, int> $tokenRankMap */
     private function __construct(array $tokenRankMap)
     {
         $this->tokenToRankMap = $tokenRankMap;
         /** @psalm-suppress PropertyTypeCoercion */
-        $this->rankToTokenMap = array_map(strval(...), array_flip($tokenRankMap));
+        $this->rankToTokenMap = [];
+        foreach (array_flip($tokenRankMap) as $rank => $token) {
+            $this->rankToTokenMap[$rank] = $token;
+        }
 
         if (count($this->tokenToRankMap) !== count($this->rankToTokenMap)) {
             throw new InvalidArgumentException('The map of tokens and ranks has duplicates of rank');
@@ -105,7 +107,7 @@ final class Vocab implements Countable
     }
 
     /** @psalm-param NonEmptyByteVector $bytes */
-    public function tryGetRank(array $bytes): int|null
+    public function tryGetRank(array $bytes): ?int
     {
         return $this->tokenToRankMap[EncodeUtil::fromBytes($bytes)] ?? null;
     }
@@ -117,20 +119,26 @@ final class Vocab implements Countable
      */
     public function getRank(array $bytes): int
     {
-        return $this->tokenToRankMap[EncodeUtil::fromBytes($bytes)] ?? throw new OutOfBoundsException(sprintf(
-            'No rank for bytes vector: [%s]',
-            implode(', ', $bytes),
-        ));
+        $rank = $this->tokenToRankMap[EncodeUtil::fromBytes($bytes)] ?? null;
+        if ($rank === null) {
+            throw new OutOfBoundsException(sprintf(
+                'No rank for bytes vector: [%s]',
+                implode(', ', $bytes),
+            ));
+        }
+
+        return $rank;
     }
 
-    /**
-     * @return non-empty-string
-     *
-     * @throws OutOfBoundsException
-     */
+    /** @throws OutOfBoundsException */
     public function getToken(int $rank): string
     {
-        return $this->rankToTokenMap[$rank] ?? throw new OutOfBoundsException(sprintf('No token for rank: %d', $rank));
+        $tokenMap = $this->rankToTokenMap[$rank] ?? null;
+        if ($tokenMap === null) {
+            throw new OutOfBoundsException(sprintf('No token for rank: %d', $rank));
+        }
+
+        return strval($tokenMap);
     }
 
     /** @psalm-api */

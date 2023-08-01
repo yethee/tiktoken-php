@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Yethee\Tiktoken;
 
-use Stringable;
 use Yethee\Tiktoken\Exception\RegexError;
 use Yethee\Tiktoken\Util\EncodeUtil;
 use Yethee\Tiktoken\Vocab\Vocab;
@@ -15,7 +14,7 @@ use function array_values;
 use function assert;
 use function count;
 use function implode;
-use function preg_last_error_msg;
+use function preg_last_error;
 use function preg_match_all;
 use function range;
 use function sprintf;
@@ -23,14 +22,17 @@ use function sprintf;
 use const PHP_INT_MAX;
 
 /** @psalm-import-type NonEmptyByteVector from EncodeUtil */
-final class Encoder implements Stringable
+final class Encoder
 {
-    /**
-     * @param non-empty-string $name
-     * @param non-empty-string $pattern
-     */
-    public function __construct(public readonly string $name, private Vocab $vocab, private string $pattern)
+    public $name;
+    private $vocab;
+    private $pattern;
+
+    public function __construct(string $name, Vocab $vocab, string $pattern)
     {
+        $this->name = $name;
+        $this->vocab = $vocab;
+        $this->pattern = $pattern;
     }
 
     public function __toString(): string
@@ -46,7 +48,7 @@ final class Encoder implements Stringable
         }
 
         if (preg_match_all($this->pattern, $text, $matches) === false) {
-            throw new RegexError(sprintf('Matching failed with error: %s', preg_last_error_msg()));
+            throw new RegexError(sprintf('Matching failed with error: %s', preg_last_error()));
         }
 
         $tokens = [];
@@ -80,7 +82,11 @@ final class Encoder implements Stringable
             return '';
         }
 
-        return implode(array_map($this->vocab->getToken(...), $tokens));
+        $tokens = array_map(function ($token) {
+            return $this->vocab->getToken($token);
+        }, $tokens);
+
+        return implode($tokens);
     }
 
     /**

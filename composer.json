@@ -5,12 +5,12 @@
   "description": "PHP version of tiktoken",
   "keywords": ["openai", "tiktoken", "tokenizer", "bpe", "encode", "decode"],
   "require": {
-    "php": "^8.1",
+    "php": "^7.3",
     "symfony/service-contracts": "^2.5 || ^3.0"
   },
   "require-dev": {
     "doctrine/coding-standard": "^11.1",
-    "phpunit/phpunit": "^10.0",
+    "phpunit/phpunit": "^9.6.10",
     "psalm/plugin-phpunit": "^0.18.3",
     "vimeo/psalm": "5.9.0"
   },

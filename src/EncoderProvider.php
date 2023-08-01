@@ -12,7 +12,8 @@ use Yethee\Tiktoken\Vocab\VocabLoader;
 
 use function getenv;
 use function sprintf;
-use function str_starts_with;
+use function strlen;
+use function substr;
 
 final class EncoderProvider implements ResetInterface
 {
@@ -72,14 +73,14 @@ final class EncoderProvider implements ResetInterface
         'code-search-ada-code-001' => 'r50k_base',
     ];
 
-    private VocabLoader|null $vocabLoader = null;
-    private string|null $vocabCacheDir = null;
+    private $vocabLoader = null;
+    private $vocabCacheDir = null;
 
-    /** @var array<non-empty-string, Encoder> */
-    private array $encoders = [];
+    /** @var array<string, Encoder> */
+    private $encoders = [];
 
     /** @var array<string, Vocab> */
-    private array $vocabs = [];
+    private $vocabs = [];
 
     public function __construct()
     {
@@ -100,7 +101,7 @@ final class EncoderProvider implements ResetInterface
         }
 
         foreach (self::MODEL_PREFIX_TO_ENCODING as $prefix => $modelEncoding) {
-            if (str_starts_with($model, $prefix)) {
+            if (substr($model, 0, strlen($prefix)) === $prefix) {
                 return $this->get($modelEncoding);
             }
         }
@@ -129,7 +130,7 @@ final class EncoderProvider implements ResetInterface
     }
 
     /** @param non-empty-string|null $cacheDir */
-    public function setVocabCache(string|null $cacheDir): void
+    public function setVocabCache(?string $cacheDir): void
     {
         $this->vocabCacheDir = $cacheDir;
         $this->vocabLoader = null;
