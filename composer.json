@@ -10,7 +10,7 @@
   },
   "require-dev": {
     "doctrine/coding-standard": "^11.1",
-    "phpunit/phpunit": "^10.0",
+    "phpunit/phpunit": "^10.3",
     "psalm/plugin-phpunit": "^0.18.3",
     "vimeo/psalm": "5.9.0"
   },
@@ -39,6 +39,6 @@
     "analyse": "psalm --stats",
     "cs-check": "phpcs",
     "cs-fix": "phpcbf",
-    "test": "phpunit --colors=always"
+    "test": "phpunit --colors=always --no-coverage"
   }
 }
