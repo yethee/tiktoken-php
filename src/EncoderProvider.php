@@ -13,6 +13,9 @@ use Yethee\Tiktoken\Vocab\VocabLoader;
 use function getenv;
 use function sprintf;
 use function str_starts_with;
+use function sys_get_temp_dir;
+
+use const DIRECTORY_SEPARATOR;
 
 final class EncoderProvider implements ResetInterface
 {
@@ -73,7 +76,7 @@ final class EncoderProvider implements ResetInterface
     ];
 
     private VocabLoader|null $vocabLoader = null;
-    private string|null $vocabCacheDir = null;
+    private string|null $vocabCacheDir;
 
     /** @var array<non-empty-string, Encoder> */
     private array $encoders = [];
@@ -85,11 +88,11 @@ final class EncoderProvider implements ResetInterface
     {
         $cacheDir = getenv('TIKTOKEN_CACHE_DIR');
 
-        if ($cacheDir === false || $cacheDir === '') {
-            return;
+        if ($cacheDir === false) {
+            $cacheDir = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'tiktoken';
         }
 
-        $this->vocabCacheDir = $cacheDir;
+        $this->vocabCacheDir = $cacheDir !== '' ? $cacheDir : null;
     }
 
     /** @param non-empty-string $model */
