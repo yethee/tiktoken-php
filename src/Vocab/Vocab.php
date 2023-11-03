@@ -87,7 +87,7 @@ final class Vocab implements Countable
 
         while ($line !== false) {
             [$encodedToken, $rank] = explode(' ', $line);
-            $token = base64_decode($encodedToken);
+            $token = base64_decode($encodedToken, true);
 
             if ($token === false) {
                 throw new ParseError(sprintf('Could not decode token "%s" at line %d', $encodedToken, $lineNo));
