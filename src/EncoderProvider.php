@@ -19,7 +19,7 @@ use const DIRECTORY_SEPARATOR;
 
 final class EncoderProvider implements ResetInterface
 {
-    private const ENCODINGS = [
+    public const ENCODINGS = [
         'r50k_base' => [
             'vocab' => 'https://openaipublic.blob.core.windows.net/encodings/r50k_base.tiktoken',
             'pat' => '/\'s|\'t|\'re|\'ve|\'m|\'ll|\'d| ?\p{L}+| ?\p{N}+| ?[^\s\p{L}\p{N}]+|\s+(?!\S)|\s+/u',

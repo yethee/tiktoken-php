@@ -10,6 +10,7 @@ use Yethee\Tiktoken\Util\EncodeUtil;
 use Yethee\Tiktoken\Vocab\Vocab;
 
 use function array_map;
+use function array_merge;
 use function array_slice;
 use function array_values;
 use function assert;
@@ -56,18 +57,56 @@ final class Encoder implements Stringable
                 continue;
             }
 
-            $piece = EncodeUtil::toBytes($match);
-            $rank = $this->vocab->tryGetRank($piece);
+            $tokenBytes = EncodeUtil::toBytes($match);
 
-            if ($rank !== null) {
+            foreach ($this->mergeBytePairs($tokenBytes) as $rank) {
                 $tokens[] = $rank;
+            }
+        }
 
+        return $tokens;
+    }
+
+    /**
+     * Encodes a given text into chunks of Byte-Pair Encoded (BPE) tokens, with each chunk containing a specified
+     * maximum number of tokens.
+     *
+     * @param string $text              The input text to be encoded.
+     * @param int    $maxTokensPerChunk The maximum number of tokens allowed per chunk.
+     *
+     * @return int[][] An array of arrays containing BPE token chunks.
+     */
+    public function encodeInChunks(string $text, int $maxTokensPerChunk): array
+    {
+        if ($text === '') {
+            return [];
+        }
+
+        if (preg_match_all($this->pattern, $text, $matches) === false) {
+            throw new RegexError(sprintf('Matching failed with error: %s', preg_last_error_msg()));
+        }
+
+        $tokens = [];
+        $tokensInCurrentChunk = [];
+
+        foreach ($matches[0] as $match) {
+            if ($match === '') {
                 continue;
             }
 
-            foreach ($this->mergeBytePairs($piece) as $rank) {
-                $tokens[] = $rank;
+            $tokenBytes = EncodeUtil::toBytes($match);
+            $mergedBytePairs = array_map(static fn (int $bytePair) => $bytePair, $this->mergeBytePairs($tokenBytes));
+
+            if (count($tokensInCurrentChunk) + count($mergedBytePairs) > $maxTokensPerChunk) {
+                $tokens[] = $tokensInCurrentChunk;
+                $tokensInCurrentChunk = [];
             }
+
+            $tokensInCurrentChunk = array_merge($tokensInCurrentChunk, $mergedBytePairs);
+        }
+
+        if (count($tokensInCurrentChunk) > 0) {
+            $tokens[] = $tokensInCurrentChunk;
         }
 
         return $tokens;
