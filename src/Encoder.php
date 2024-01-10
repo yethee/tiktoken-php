@@ -93,7 +93,7 @@ final class Encoder implements Stringable
             throw new RegexError(sprintf('Matching failed with error: %s', preg_last_error_msg()));
         }
 
-        $tokens = [];
+        $chunks = [];
         $tokensInCurrentChunk = [];
 
         foreach ($matches[0] as $match) {
@@ -105,7 +105,7 @@ final class Encoder implements Stringable
             $mergedBytePairs = $this->mergeBytePairs($tokenBytes);
 
             if (count($tokensInCurrentChunk) + count($mergedBytePairs) > $maxTokensPerChunk) {
-                $tokens[] = $tokensInCurrentChunk;
+                $chunks[] = $tokensInCurrentChunk;
                 $tokensInCurrentChunk = [];
             }
 
@@ -113,10 +113,10 @@ final class Encoder implements Stringable
         }
 
         if (count($tokensInCurrentChunk) > 0) {
-            $tokens[] = $tokensInCurrentChunk;
+            $chunks[] = $tokensInCurrentChunk;
         }
 
-        return $tokens;
+        return $chunks;
     }
 
     /** @param array<int> $tokens */
