@@ -78,10 +78,10 @@ final class Encoder implements Stringable
      * Encodes a given text into chunks of Byte-Pair Encoded (BPE) tokens, with each chunk containing a specified
      * maximum number of tokens.
      *
-     * @param string $text              The input text to be encoded.
-     * @param int    $maxTokensPerChunk The maximum number of tokens allowed per chunk.
+     * @param string       $text              The input text to be encoded.
+     * @param positive-int $maxTokensPerChunk The maximum number of tokens allowed per chunk.
      *
-     * @return int[][] An array of arrays containing BPE token chunks.
+     * @return list<list<int>> An array of arrays containing BPE token chunks.
      */
     public function encodeInChunks(string $text, int $maxTokensPerChunk): array
     {

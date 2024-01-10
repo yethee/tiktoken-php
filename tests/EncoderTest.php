@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Yethee\Tiktoken\Tests;
 
-use Generator;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use Yethee\Tiktoken\Encoder;
@@ -13,9 +12,9 @@ use Yethee\Tiktoken\Vocab\Vocab;
 
 final class EncoderTest extends TestCase
 {
-    /** @param int[] $encodings */
+    /** @param list<int> $tokens */
     #[DataProvider('provideDataForFlatTokenization')]
-    public function testEncode(string $text, array $encodings): void
+    public function testEncode(string $text, array $tokens): void
     {
         $vocab = Vocab::fromFile(__DIR__ . '/Fixtures/cl100k_base.tiktoken');
         $encoder = new Encoder(
@@ -24,12 +23,12 @@ final class EncoderTest extends TestCase
             '/(?i:\'s|\'t|\'re|\'ve|\'m|\'ll|\'d)|[^\r\n\p{L}\p{N}]?\p{L}+|\p{N}{1,3}| ?[^\s\p{L}\p{N}]+[\r\n]*|\s*[\r\n]+|\s+(?!\S)|\s+/u',
         );
 
-        self::assertSame($encodings, $encoder->encode($text));
+        self::assertSame($tokens, $encoder->encode($text));
     }
 
-    /** @param int[] $encodings */
+    /** @param list<int> $tokens */
     #[DataProvider('provideDataForFlatTokenization')]
-    public function testDecode(string $text, array $encodings): void
+    public function testDecode(string $text, array $tokens): void
     {
         $vocab = Vocab::fromFile(__DIR__ . '/Fixtures/cl100k_base.tiktoken');
         $encoder = new Encoder(
@@ -38,10 +37,13 @@ final class EncoderTest extends TestCase
             '/(?i:\'s|\'t|\'re|\'ve|\'m|\'ll|\'d)|[^\r\n\p{L}\p{N}]?\p{L}+|\p{N}{1,3}| ?[^\s\p{L}\p{N}]+[\r\n]*|\s*[\r\n]+|\s+(?!\S)|\s+/u',
         );
 
-        self::assertSame($text, $encoder->decode($encodings));
+        self::assertSame($text, $encoder->decode($tokens));
     }
 
-    /** @param int[][] $expected */
+    /**
+     * @param positive-int    $maxTokensPerChunk
+     * @param list<list<int>> $expected
+     */
     #[DataProvider('provideDataForChunkBasedTokenization')]
     public function testEncodeInChunks(Encoder $encoder, string $text, int $maxTokensPerChunk, array $expected): void
     {
@@ -49,11 +51,11 @@ final class EncoderTest extends TestCase
     }
 
     /**
-     * @return Generator<array<mixed>>
+     * @return iterable<array{string, list<int>}>
      *
      * @psalm-suppress PossiblyUnusedMethod
      */
-    public static function provideDataForFlatTokenization(): Generator
+    public static function provideDataForFlatTokenization(): iterable
     {
         yield 'hello world' => ['hello world', [15339, 1917]];
 
@@ -65,11 +67,16 @@ final class EncoderTest extends TestCase
     }
 
     /**
-     * @return Generator<array<mixed>>
+     * @return iterable<array{
+     *     Encoder,
+     *     string,
+     *     positive-int,
+     *     list<list<int>>
+     * }>
      *
      * @psalm-suppress PossiblyUnusedMethod
      */
-    public static function provideDataForChunkBasedTokenization(): Generator
+    public static function provideDataForChunkBasedTokenization(): iterable
     {
         yield 'p50k_base' => [
             self::getEncoder('p50k_base'),
