@@ -16,12 +16,7 @@ final class EncoderTest extends TestCase
     #[DataProvider('provideDataForFlatTokenization')]
     public function testEncode(string $text, array $tokens): void
     {
-        $vocab = Vocab::fromFile(__DIR__ . '/Fixtures/cl100k_base.tiktoken');
-        $encoder = new Encoder(
-            'cl100k_base',
-            $vocab,
-            '/(?i:\'s|\'t|\'re|\'ve|\'m|\'ll|\'d)|[^\r\n\p{L}\p{N}]?\p{L}+|\p{N}{1,3}| ?[^\s\p{L}\p{N}]+[\r\n]*|\s*[\r\n]+|\s+(?!\S)|\s+/u',
-        );
+        $encoder = self::getEncoder('cl100k_base');
 
         self::assertSame($tokens, $encoder->encode($text));
     }
@@ -30,12 +25,7 @@ final class EncoderTest extends TestCase
     #[DataProvider('provideDataForFlatTokenization')]
     public function testDecode(string $text, array $tokens): void
     {
-        $vocab = Vocab::fromFile(__DIR__ . '/Fixtures/cl100k_base.tiktoken');
-        $encoder = new Encoder(
-            'cl100k_base',
-            $vocab,
-            '/(?i:\'s|\'t|\'re|\'ve|\'m|\'ll|\'d)|[^\r\n\p{L}\p{N}]?\p{L}+|\p{N}{1,3}| ?[^\s\p{L}\p{N}]+[\r\n]*|\s*[\r\n]+|\s+(?!\S)|\s+/u',
-        );
+        $encoder = self::getEncoder('cl100k_base');
 
         self::assertSame($text, $encoder->decode($tokens));
     }
