@@ -57,9 +57,16 @@ final class Encoder implements Stringable
                 continue;
             }
 
-            $tokenBytes = EncodeUtil::toBytes($match);
+            $piece = EncodeUtil::toBytes($match);
+            $rank = $this->vocab->tryGetRank($piece);
 
-            foreach ($this->mergeBytePairs($tokenBytes) as $rank) {
+            if ($rank !== null) {
+                $tokens[] = $rank;
+
+                continue;
+            }
+
+            foreach ($this->mergeBytePairs($piece) as $rank) {
                 $tokens[] = $rank;
             }
         }
@@ -95,7 +102,7 @@ final class Encoder implements Stringable
             }
 
             $tokenBytes = EncodeUtil::toBytes($match);
-            $mergedBytePairs = array_map(static fn (int $bytePair) => $bytePair, $this->mergeBytePairs($tokenBytes));
+            $mergedBytePairs = $this->mergeBytePairs($tokenBytes);
 
             if (count($tokensInCurrentChunk) + count($mergedBytePairs) > $maxTokensPerChunk) {
                 $tokens[] = $tokensInCurrentChunk;
