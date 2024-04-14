@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<files psalm-version="5.15.0@5c774aca4746caf3d239d9c8cadb9f882ca29352">
+<files psalm-version="5.23.1@8471a896ccea3526b26d082f4461eeea467f10a4">
   <file src="src/Util/EncodeUtil.php">
     <LessSpecificReturnStatement>
-      <code>array_map(hexdec(...), str_split(bin2hex($text), 2))</code>
+      <code><![CDATA[array_map(hexdec(...), str_split(bin2hex($text), 2))]]></code>
       <code><![CDATA[pack('C*', ...$bytes)]]></code>
     </LessSpecificReturnStatement>
     <MoreSpecificReturnType>
-      <code>NonEmptyByteVector</code>
-      <code>non-empty-string</code>
+      <code><![CDATA[NonEmptyByteVector]]></code>
+      <code><![CDATA[non-empty-string]]></code>
     </MoreSpecificReturnType>
   </file>
 </files>
