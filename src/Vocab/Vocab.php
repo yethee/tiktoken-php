@@ -104,22 +104,25 @@ final class Vocab implements Countable
         return new self($map);
     }
 
-    /** @psalm-param NonEmptyByteVector $bytes */
-    public function tryGetRank(array $bytes): int|null
+    public function tryGetRank(string $binary): int|null
     {
-        return $this->tokenToRankMap[EncodeUtil::fromBytes($bytes)] ?? null;
+        if ($binary === '') {
+            throw new InvalidArgumentException('Argument $binary cannot be an empty string');
+        }
+
+        return $this->tokenToRankMap[$binary] ?? null;
     }
 
-    /**
-     * @psalm-param NonEmptyByteVector $bytes
-     *
-     * @throws OutOfBoundsException
-     */
-    public function getRank(array $bytes): int
+    /** @throws OutOfBoundsException */
+    public function getRank(string $binary): int
     {
-        return $this->tokenToRankMap[EncodeUtil::fromBytes($bytes)] ?? throw new OutOfBoundsException(sprintf(
+        if ($binary === '') {
+            throw new InvalidArgumentException('Argument $binary cannot be an empty string');
+        }
+
+        return $this->tokenToRankMap[$binary] ?? throw new OutOfBoundsException(sprintf(
             'No rank for bytes vector: [%s]',
-            implode(', ', $bytes),
+            implode(', ', EncodeUtil::toBytes($binary)),
         ));
     }
 
