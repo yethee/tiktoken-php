@@ -11,15 +11,14 @@ use Yethee\Tiktoken\Vocab\Vocab;
 
 use function array_map;
 use function array_merge;
-use function array_slice;
 use function array_values;
-use function assert;
 use function count;
 use function implode;
 use function preg_last_error_msg;
 use function preg_match_all;
-use function range;
 use function sprintf;
+use function strlen;
+use function substr;
 
 use const PHP_INT_MAX;
 
@@ -57,8 +56,7 @@ final class Encoder implements Stringable
                 continue;
             }
 
-            $piece = EncodeUtil::toBytes($match);
-            $rank = $this->vocab->tryGetRank($piece);
+            $rank = $this->vocab->tryGetRank($match);
 
             if ($rank !== null) {
                 $tokens[] = $rank;
@@ -66,7 +64,7 @@ final class Encoder implements Stringable
                 continue;
             }
 
-            foreach ($this->mergeBytePairs($piece) as $rank) {
+            foreach ($this->mergeBytePairs($match) as $rank) {
                 $tokens[] = $rank;
             }
         }
@@ -101,15 +99,15 @@ final class Encoder implements Stringable
                 continue;
             }
 
-            $tokenBytes = EncodeUtil::toBytes($match);
-            $mergedBytePairs = $this->mergeBytePairs($tokenBytes);
+            $rank = $this->vocab->tryGetRank($match);
+            $tokens = $rank !== null ? [$rank] : $this->mergeBytePairs($match);
 
-            if (count($tokensInCurrentChunk) + count($mergedBytePairs) > $maxTokensPerChunk) {
+            if (count($tokensInCurrentChunk) + count($tokens) > $maxTokensPerChunk) {
                 $chunks[] = $tokensInCurrentChunk;
                 $tokensInCurrentChunk = [];
             }
 
-            $tokensInCurrentChunk = array_merge($tokensInCurrentChunk, $mergedBytePairs);
+            $tokensInCurrentChunk = array_merge($tokensInCurrentChunk, $tokens);
         }
 
         if (count($tokensInCurrentChunk) > 0) {
@@ -130,37 +128,32 @@ final class Encoder implements Stringable
     }
 
     /**
-     * @psalm-param NonEmptyByteVector $bytes
+     * @param non-empty-string $piece
      *
      * @return list<int>
      */
-    private function mergeBytePairs(array $bytes): array
+    private function mergeBytePairs(string $piece): array
     {
-        /** @var list<array{int, int}> $parts */
-        $parts = array_map(
-            function (int $i) use ($bytes): array {
-                if ($i + 1 < count($bytes)) {
-                    $piece = array_slice($bytes, $i, 2);
-                    assert(count($piece) === 2);
+        $parts = [];
 
-                    return [$i, $this->vocab->tryGetRank($piece) ?? PHP_INT_MAX];
-                }
+        for ($i = 0; $i <= strlen($piece); $i++) {
+            $parts[] = [$i, PHP_INT_MAX];
+        }
 
-                return [$i, PHP_INT_MAX];
-            },
-            range(0, count($bytes)),
-        );
-        $getRank = function (array $parts, int $startIndex) use ($bytes): int {
-            if ($startIndex + 2 >= count($parts)) {
+        $getRank = function (array $parts, int $startIndex, int $skip = 0) use (&$piece): int {
+            if (($startIndex + $skip + 2) >= count($parts)) {
                 return PHP_INT_MAX;
             }
 
             $offset = $parts[$startIndex][0];
-            $piece  = array_slice($bytes, $offset, $parts[$startIndex + 2][0] - $offset);
-            assert(count($piece) > 0);
+            $length = $parts[$startIndex + $skip + 2][0] - $offset;
 
-            return $this->vocab->tryGetRank($piece) ?? PHP_INT_MAX;
+            return $this->vocab->tryGetRank(substr($piece, $offset, $length)) ?? PHP_INT_MAX;
         };
+
+        for ($i = 0; $i < count($parts) - 2; $i++) {
+            $parts[$i][1] = $getRank($parts, $i);
+        }
 
         while (count($parts) > 1) {
             $minRank = PHP_INT_MAX;
@@ -196,10 +189,10 @@ final class Encoder implements Stringable
         $res = [];
 
         for ($i = 0; $i < $stop; $i++) {
-            $piece = array_slice($bytes, $parts[$i][0], $parts[$i + 1][0] - $parts[$i][0]);
-            assert(count($piece) > 0);
+            $offset = $parts[$i][0];
+            $length = $parts[$i + 1][0] - $offset;
 
-            $res[] = $this->vocab->getRank($piece);
+            $res[] = $this->vocab->getRank(substr($piece, $offset, $length));
         }
 
         return $res;
