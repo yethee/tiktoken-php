@@ -1,0 +1,25 @@
+{
+  "$schema":"./vendor/phpbench/phpbench/phpbench.schema.json",
+  "runner.bootstrap": "vendor/autoload.php",
+  "runner.path": "tests/Benchmark",
+  "core.profiles": {
+    "jit": {
+      "runner.php_config": {
+        "zend_extension": ["opcache"],
+        "opcache.enable_cli": 1,
+        "opcache.enable": 1,
+        "opcache.jit_buffer_size": "32M",
+        "opcache.jit": 1255,
+        "xdebug.mode": "off"
+      }
+    }
+  },
+  "storage.xml_storage_path": ".cache/phpbench/storage",
+  "report.generators": {
+    "encode": {
+      "generator": "expression",
+      "break": ["subject"],
+      "cols": ["benchmark", "subject", "set", "revs", "its", "mem_peak", "mode", "rstdev"]
+    }
+  }
+}

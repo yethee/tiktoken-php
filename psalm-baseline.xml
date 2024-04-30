@@ -10,4 +10,11 @@
       <code><![CDATA[non-empty-string]]></code>
     </MoreSpecificReturnType>
   </file>
+  <file src="tests/Benchmark/EncoderBench.php">
+    <MissingConstructor>
+      <code><![CDATA[$encoder]]></code>
+      <code><![CDATA[$text]]></code>
+      <code><![CDATA[$tokens]]></code>
+    </MissingConstructor>
+  </file>
 </files>
