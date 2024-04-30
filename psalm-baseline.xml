@@ -3,11 +3,9 @@
   <file src="src/Util/EncodeUtil.php">
     <LessSpecificReturnStatement>
       <code><![CDATA[array_map(hexdec(...), str_split(bin2hex($text), 2))]]></code>
-      <code><![CDATA[pack('C*', ...$bytes)]]></code>
     </LessSpecificReturnStatement>
     <MoreSpecificReturnType>
       <code><![CDATA[NonEmptyByteVector]]></code>
-      <code><![CDATA[non-empty-string]]></code>
     </MoreSpecificReturnType>
   </file>
   <file src="tests/Benchmark/EncoderBench.php">
