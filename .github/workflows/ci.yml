@@ -8,7 +8,7 @@ jobs:
   coding-standards:
     name: "Check Coding Standards"
 
-    runs-on: ubuntu-latest
+    runs-on: "ubuntu-latest"
 
     steps:
       - name: "Checkout"
@@ -19,7 +19,7 @@ jobs:
         with:
           coverage: "none"
           php-version: "8.1"
-          tools: composer:v2
+          tools: "composer:v2"
 
       - name: "Install dependencies"
         uses: "ramsey/composer-install@v3"
@@ -27,12 +27,12 @@ jobs:
           dependency-versions: "highest"
 
       - name: "Run phpcs"
-        run: vendor/bin/phpcs -n
+        run: "vendor/bin/phpcs -n"
 
   static-analysis:
     name: "Static Analysis"
 
-    runs-on: ubuntu-latest
+    runs-on: "ubuntu-latest"
 
     steps:
       - name: "Checkout"
@@ -43,7 +43,7 @@ jobs:
         with:
           coverage: "none"
           php-version: "8.1"
-          tools: composer:v2
+          tools: "composer:v2"
 
       - name: "Install dependencies"
         uses: "ramsey/composer-install@v3"
@@ -51,12 +51,43 @@ jobs:
           dependency-versions: "highest"
 
       - name: "Run psalm"
-        run: vendor/bin/psalm
+        run: "vendor/bin/psalm"
+
+  code-coverage:
+    name: "Code coverage"
+
+    needs: [ "coding-standards", "static-analysis" ]
+    runs-on: "ubuntu-latest"
+
+    steps:
+      - name: "Checkout"
+        uses: "actions/checkout@v4"
+
+      - name: "Install PHP"
+        uses: "shivammathur/setup-php@v2"
+        with:
+          coverage: "pcov"
+          php-version: "8.3"
+          tools: "composer:v2"
+
+      - name: "Install dependencies"
+        uses: "ramsey/composer-install@v3"
+        with:
+          dependency-versions: "highest"
+
+      - name: "Run tests"
+        run: "vendor/bin/phpunit --coverage-clover=coverage.xml"
+
+      - name: "Upload coverage reports to Codecov"
+        uses: "codecov/codecov-action@v4"
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
 
   tests:
     name: "PHPUnit tests"
 
-    runs-on: ubuntu-latest
+    needs: ["code-coverage"]
+    runs-on: "ubuntu-latest"
 
     strategy:
       matrix:
@@ -78,7 +109,7 @@ jobs:
         uses: "shivammathur/setup-php@v2"
         with:
           php-version: "${{ matrix.php-version }}"
-          tools: composer:v2
+          tools: "composer:v2"
 
       - name: "Install dependencies"
         uses: "ramsey/composer-install@v3"
@@ -86,4 +117,4 @@ jobs:
           dependency-versions: "${{ matrix.dependencies }}"
 
       - name: "Run tests"
-        run: vendor/bin/phpunit
+        run: "vendor/bin/phpunit --no-coverage"
