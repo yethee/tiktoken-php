@@ -49,5 +49,7 @@ final class EncoderProviderTest extends TestCase
         yield 'text-davinci-003' => ['text-davinci-003', 'p50k_base'];
         yield 'text-davinci-edit-001' => ['text-davinci-edit-001', 'p50k_edit'];
         yield 'gpt-3.5-turbo-0301' => ['gpt-3.5-turbo-0301', 'cl100k_base'];
+        yield 'gpt-4-32k' => ['gpt-4-32k', 'cl100k_base'];
+        yield 'gpt-4o-2024-05-13' => ['gpt-4o-2024-05-13', 'o200k_base'];
     }
 }

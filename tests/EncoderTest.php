@@ -12,20 +12,26 @@ use Yethee\Tiktoken\Vocab\Vocab;
 
 final class EncoderTest extends TestCase
 {
-    /** @param list<int> $tokens */
+    /**
+     * @param non-empty-string $encoding
+     * @param list<int>        $tokens
+     */
     #[DataProvider('provideDataForFlatTokenization')]
-    public function testEncode(string $text, array $tokens): void
+    public function testEncode(string $text, string $encoding, array $tokens): void
     {
-        $encoder = self::getEncoder('cl100k_base');
+        $encoder = self::getEncoder($encoding);
 
         self::assertSame($tokens, $encoder->encode($text));
     }
 
-    /** @param list<int> $tokens */
+    /**
+     * @param non-empty-string $encoding
+     * @param list<int>        $tokens
+     */
     #[DataProvider('provideDataForFlatTokenization')]
-    public function testDecode(string $text, array $tokens): void
+    public function testDecode(string $text, string $encoding, array $tokens): void
     {
-        $encoder = self::getEncoder('cl100k_base');
+        $encoder = self::getEncoder($encoding);
 
         self::assertSame($text, $encoder->decode($tokens));
     }
@@ -41,19 +47,27 @@ final class EncoderTest extends TestCase
     }
 
     /**
-     * @return iterable<array{string, list<int>}>
+     * @return iterable<array{string, string, list<int>}>
      *
      * @psalm-suppress PossiblyUnusedMethod
      */
     public static function provideDataForFlatTokenization(): iterable
     {
-        yield 'hello world' => ['hello world', [15339, 1917]];
+        yield '[cl100k_base] hello world' => ['hello world', 'cl100k_base', [15339, 1917]];
 
-        yield 'привет мир' => ['привет мир', [8164, 2233, 28089, 8341, 11562, 78746]];
+        yield '[cl100k_base] привет мир' => ['привет мир', 'cl100k_base', [8164, 2233, 28089, 8341, 11562, 78746]];
 
-        yield 'emoji' => ['🌶', [9468, 234, 114]];
+        yield '[cl100k_base] emoji' => ['🌶', 'cl100k_base', [9468, 234, 114]];
 
-        yield 'new line character' => [".\n", [627]];
+        yield '[cl100k_base] new line character' => [".\n", 'cl100k_base', [627]];
+
+        yield '[o200k_base] hello world' => ['hello world', 'o200k_base', [24912, 2375]];
+
+        yield '[o200k_base] привет мир' => ['привет мир', 'o200k_base', [9501, 131903, 37934]];
+
+        yield '[o200k_base] emoji' => ['🌶', 'o200k_base', [64364, 114]];
+
+        yield '[o200k_base] new line character' => [".\n", 'o200k_base', [558]];
     }
 
     /**
