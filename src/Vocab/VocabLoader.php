@@ -7,5 +7,5 @@ namespace Yethee\Tiktoken\Vocab;
 interface VocabLoader
 {
     /** @param non-empty-string $uri */
-    public function load(string $uri): Vocab;
+    public function load(string $uri, string|null $checksum = null): Vocab;
 }

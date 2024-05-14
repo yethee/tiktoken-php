@@ -12,10 +12,11 @@ use function assert;
 use function fclose;
 use function file_exists;
 use function fopen;
+use function hash_equals;
+use function hash_file;
 use function is_dir;
 use function is_writable;
 use function mkdir;
-use function preg_match;
 use function sha1;
 use function sprintf;
 use function stream_copy_to_stream;
@@ -28,16 +29,12 @@ final class DefaultVocabLoader implements VocabLoader
     {
     }
 
-    public function load(string $uri): Vocab
+    public function load(string $uri, string|null $checksum = null): Vocab
     {
-        if ($this->cacheDir !== null && preg_match('@^https?://@i', $uri)) {
-            $cacheFile = $this->cacheDir . DIRECTORY_SEPARATOR . sha1($uri);
-        } else {
-            $cacheFile = null;
-        }
+        $cacheFile = $this->cacheDir !== null ? $this->cacheDir . DIRECTORY_SEPARATOR . sha1($uri) : null;
 
         if ($cacheFile !== null) {
-            if (file_exists($cacheFile)) {
+            if (file_exists($cacheFile) && $this->checkHash($cacheFile, $checksum)) {
                 return Vocab::fromFile($cacheFile);
             }
 
@@ -82,5 +79,20 @@ final class DefaultVocabLoader implements VocabLoader
         } finally {
             fclose($stream);
         }
+    }
+
+    private function checkHash(string $filename, string|null $expectedHash): bool
+    {
+        if ($expectedHash === null) {
+            return true;
+        }
+
+        $hash = hash_file('sha256', $filename);
+
+        if ($hash === false) {
+            return false;
+        }
+
+        return hash_equals($hash, $expectedHash);
     }
 }
