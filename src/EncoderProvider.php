@@ -38,7 +38,7 @@ final class EncoderProvider implements ResetInterface
         ],
     ];
     private const MODEL_PREFIX_TO_ENCODING = [
-        'gpt-4-' => 'cl100k_base',
+        'gpt-4' => 'cl100k_base',
         'gpt-3.5-turbo-' => 'cl100k_base',
     ];
     private const MODEL_TO_ENCODING = [
