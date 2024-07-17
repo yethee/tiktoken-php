@@ -7,6 +7,7 @@ namespace Yethee\Tiktoken\Tests\Vocab\Loader;
 use org\bovigo\vfs\vfsStream;
 use org\bovigo\vfs\vfsStreamDirectory;
 use PHPUnit\Framework\TestCase;
+use RuntimeException;
 use Yethee\Tiktoken\Vocab\Loader\DefaultVocabLoader;
 
 use function dirname;
@@ -48,6 +49,17 @@ final class DefaultVocabLoaderTest extends TestCase
 
         self::assertFileExists($cacheFile->url());
         self::assertFileEquals($vocabUrl, $cacheFile->url());
+    }
+
+    public function testChecksumWhenNoCache(): void
+    {
+        $loader = new DefaultVocabLoader();
+        $vocabUrl = dirname(__DIR__, 2) . '/Fixtures/p50k_base.tiktoken';
+
+        $this->expectException(RuntimeException::class);
+        $this->expectExceptionMessageMatches('/Checksum failed/');
+
+        $loader->load($vocabUrl, hash('sha256', 'expected hash'));
     }
 
     protected function setUp(): void

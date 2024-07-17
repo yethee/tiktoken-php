@@ -13,13 +13,19 @@ use function fclose;
 use function file_exists;
 use function fopen;
 use function hash_equals;
-use function hash_file;
+use function hash_final;
+use function hash_init;
+use function hash_update_file;
+use function hash_update_stream;
 use function is_dir;
+use function is_resource;
 use function is_writable;
 use function mkdir;
+use function rewind;
 use function sha1;
 use function sprintf;
 use function stream_copy_to_stream;
+use function stream_get_meta_data;
 
 use const DIRECTORY_SEPARATOR;
 
@@ -59,6 +65,17 @@ final class DefaultVocabLoader implements VocabLoader
         }
 
         try {
+            if ($checksum !== null && $this->isRewindable($stream)) {
+                if (! $this->checkHash($stream, $checksum)) {
+                    throw new RuntimeException(sprintf(
+                        'Checksum failed. Could not load vocab from URI: %s',
+                        $uri,
+                    ));
+                }
+
+                rewind($stream);
+            }
+
             if ($cacheFile !== null) {
                 $cacheStream = fopen($cacheFile, 'w+');
 
@@ -81,18 +98,31 @@ final class DefaultVocabLoader implements VocabLoader
         }
     }
 
-    private function checkHash(string $filename, string|null $expectedHash): bool
+    /** @param string|resource $resource */
+    private function checkHash($resource, string|null $expectedHash): bool
     {
         if ($expectedHash === null) {
             return true;
         }
 
-        $hash = hash_file('sha256', $filename);
+        $ctx = hash_init('sha256');
 
-        if ($hash === false) {
-            return false;
+        if (is_resource($resource)) {
+            hash_update_stream($ctx, $resource);
+        } else {
+            hash_update_file($ctx, $resource);
         }
 
+        $hash = hash_final($ctx);
+
         return hash_equals($hash, $expectedHash);
+    }
+
+    /** @param resource $stream */
+    private function isRewindable($stream): bool
+    {
+        $meta = stream_get_meta_data($stream);
+
+        return $meta['seekable'];
     }
 }
