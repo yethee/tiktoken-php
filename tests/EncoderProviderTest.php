@@ -4,11 +4,13 @@ declare(strict_types=1);
 
 namespace Yethee\Tiktoken\Tests;
 
+use org\bovigo\vfs\vfsStream;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use Yethee\Tiktoken\EncoderProvider;
 
 use function dirname;
+use function hash;
 
 final class EncoderProviderTest extends TestCase
 {
@@ -37,6 +39,24 @@ final class EncoderProviderTest extends TestCase
 
         $encoder = $provider->get('cl100k_base');
         self::assertSame([15339, 1917], $encoder->encode('hello world'));
+    }
+
+    public function testUseHashWhenLoadVocab(): void
+    {
+        $cache = vfsStream::setup('cache');
+        $vocabCacheFilename = hash('sha1', EncoderProvider::ENCODINGS['p50k_base']['vocab']);
+
+        $cacheFile = vfsStream::newFile($vocabCacheFilename)
+            ->withContent('broken cache')
+            ->at($cache);
+
+        $provider = new EncoderProvider();
+        /** @psalm-suppress ArgumentTypeCoercion */
+        $provider->setVocabCache($cache->url());
+
+        $provider->get('p50k_base');
+
+        self::assertNotEquals('broken cache', $cacheFile->getContent());
     }
 
     /**

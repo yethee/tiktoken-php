@@ -174,6 +174,9 @@ final class EncoderProvider implements ResetInterface
             $loader = $this->vocabLoader = new DefaultVocabLoader($this->vocabCacheDir);
         }
 
-        return $this->vocabs[$encodingName] = $loader->load(self::ENCODINGS[$encodingName]['vocab']);
+        return $this->vocabs[$encodingName] = $loader->load(
+            self::ENCODINGS[$encodingName]['vocab'],
+            self::ENCODINGS[$encodingName]['hash'] ?? null,
+        );
     }
 }
