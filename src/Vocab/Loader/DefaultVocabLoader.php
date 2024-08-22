@@ -58,7 +58,14 @@ final class DefaultVocabLoader implements VocabLoader
             }
         }
 
-        $stream = fopen($uri, 'r');
+        $opts = [
+            "ssl" => [
+                "verify_peer" => false,
+                "verify_peer_name" => false,
+            ],
+        ];
+
+        $stream = fopen($uri, 'r', false, stream_context_create($opts));
 
         if ($stream === false) {
             throw new RuntimeException(sprintf('Could not open stream for URI: %s', $uri));
