@@ -185,4 +185,9 @@ final class EncoderProvider implements ResetInterface
             self::ENCODINGS[$encodingName]['hash'] ?? null,
         );
     }
+
+    public function getSupportedModels(): array
+    {
+        return array_keys(self::MODEL_TO_ENCODING);
+    }
 }
