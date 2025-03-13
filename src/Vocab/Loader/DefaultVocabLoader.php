@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Yethee\Tiktoken\Vocab\Loader;
 
+use Override;
 use RuntimeException;
 use Yethee\Tiktoken\Vocab\Vocab;
 use Yethee\Tiktoken\Vocab\VocabLoader;
@@ -35,6 +36,7 @@ final class DefaultVocabLoader implements VocabLoader
     {
     }
 
+    #[Override]
     public function load(string $uri, string|null $checksum = null): Vocab
     {
         $cacheFile = $this->cacheDir !== null ? $this->cacheDir . DIRECTORY_SEPARATOR . sha1($uri) : null;

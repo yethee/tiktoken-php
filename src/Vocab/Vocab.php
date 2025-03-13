@@ -7,6 +7,7 @@ namespace Yethee\Tiktoken\Vocab;
 use Countable;
 use InvalidArgumentException;
 use OutOfBoundsException;
+use Override;
 use RuntimeException;
 use Yethee\Tiktoken\Exception\ParseError;
 use Yethee\Tiktoken\Util\EncodeUtil;
@@ -137,6 +138,7 @@ final class Vocab implements Countable
     }
 
     /** @psalm-api */
+    #[Override]
     public function count(): int
     {
         return count($this->tokenToRankMap);

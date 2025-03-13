@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<files psalm-version="5.23.1@8471a896ccea3526b26d082f4461eeea467f10a4">
+<files psalm-version="6.8.9@e856423a5dc38d65e56b5792750c557277afe393">
   <file src="src/Util/EncodeUtil.php">
-    <LessSpecificReturnStatement>
+    <InvalidReturnStatement>
       <code><![CDATA[array_map(hexdec(...), str_split(bin2hex($text), 2))]]></code>
-    </LessSpecificReturnStatement>
-    <MoreSpecificReturnType>
+    </InvalidReturnStatement>
+    <InvalidReturnType>
       <code><![CDATA[NonEmptyByteVector]]></code>
-    </MoreSpecificReturnType>
+    </InvalidReturnType>
   </file>
   <file src="tests/Benchmark/EncoderBench.php">
     <MissingConstructor>

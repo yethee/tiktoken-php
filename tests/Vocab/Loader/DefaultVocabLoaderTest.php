@@ -6,6 +6,7 @@ namespace Yethee\Tiktoken\Tests\Vocab\Loader;
 
 use org\bovigo\vfs\vfsStream;
 use org\bovigo\vfs\vfsStreamDirectory;
+use Override;
 use PHPUnit\Framework\TestCase;
 use RuntimeException;
 use Yethee\Tiktoken\Vocab\Loader\DefaultVocabLoader;
@@ -62,6 +63,7 @@ final class DefaultVocabLoaderTest extends TestCase
         $loader->load($vocabUrl, hash('sha256', 'expected hash'));
     }
 
+    #[Override]
     protected function setUp(): void
     {
         $this->cacheDir = vfsStream::setup('cache');

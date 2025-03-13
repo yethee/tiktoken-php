@@ -5,11 +5,13 @@ declare(strict_types=1);
 namespace Yethee\Tiktoken\Tests\Benchmark;
 
 use PhpBench\Attributes as Bench;
+use RuntimeException;
 use Yethee\Tiktoken\Encoder;
 use Yethee\Tiktoken\EncoderProvider;
 
 use function dirname;
 use function file_get_contents;
+use function sprintf;
 
 /** @psalm-api */
 #[Bench\Iterations(5)]
@@ -39,7 +41,13 @@ final class EncoderBench
 
         $this->encoder = $provider->get($params['encoding']);
 
-        $this->text = file_get_contents(__DIR__ . '/fixtures/' . $params['fixture'] . '.txt');
+        $content = file_get_contents(__DIR__ . '/fixtures/' . $params['fixture'] . '.txt');
+
+        if ($content === false) {
+            throw new RuntimeException(sprintf('Fixture "%s" does not exist', $params['fixture']));
+        }
+
+        $this->text = $content;
         $this->tokens = $this->encoder->encode($this->text);
     }
 

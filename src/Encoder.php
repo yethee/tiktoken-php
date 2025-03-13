@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Yethee\Tiktoken;
 
+use Override;
 use Stringable;
 use Yethee\Tiktoken\Exception\RegexError;
 use Yethee\Tiktoken\Util\EncodeUtil;
@@ -33,6 +34,7 @@ final class Encoder implements Stringable
     {
     }
 
+    #[Override]
     public function __toString(): string
     {
         return sprintf('Encoder(name="%s", vocab=%d)', $this->name, count($this->vocab));

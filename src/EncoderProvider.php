@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Yethee\Tiktoken;
 
 use InvalidArgumentException;
+use Override;
 use Symfony\Contracts\Service\ResetInterface;
 use Yethee\Tiktoken\Vocab\Loader\DefaultVocabLoader;
 use Yethee\Tiktoken\Vocab\Vocab;
@@ -162,6 +163,7 @@ final class EncoderProvider implements ResetInterface
         $this->vocabLoader = $loader;
     }
 
+    #[Override]
     public function reset(): void
     {
         $this->encoders = [];
