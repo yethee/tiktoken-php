@@ -2,6 +2,7 @@
 
 ![Packagist Version](https://img.shields.io/packagist/v/yethee/tiktoken)
 ![Build status](https://img.shields.io/github/actions/workflow/status/yethee/tiktoken-php/ci.yml?branch=master)
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/63c917bd9c6d4ee3a00f80087b838cb0)](https://app.codacy.com/gh/yethee/tiktoken-php?utm_source=github.com&utm_medium=referral&utm_content=yethee/tiktoken-php&utm_campaign=Badge_Grade)
 [![codecov](https://codecov.io/github/yethee/tiktoken-php/graph/badge.svg)](https://codecov.io/github/yethee/tiktoken-php)
 ![License](https://img.shields.io/github/license/yethee/tiktoken-php)
 
