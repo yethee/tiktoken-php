@@ -23,7 +23,7 @@ use function file_get_contents;
 final class EncoderBench
 {
     private const TEXTS = ['baconipsum', 'cyrillic', 'latin'];
-    private const ENCODINGS = ['p50k_base', 'cl100k_base'];
+    private const ENCODINGS = ['p50k_base', 'cl100k_base', 'o200k_base'];
 
     private Encoder $encoder;
     private string $text;
