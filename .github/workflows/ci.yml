@@ -78,10 +78,11 @@ jobs:
       - name: "Run tests"
         run: "vendor/bin/phpunit --coverage-clover=coverage.xml"
 
-      - name: "Upload coverage reports to Codecov"
-        uses: "codecov/codecov-action@v4"
+      - name: "Upload coverage reports to Codacy"
+        uses: "codacy/codacy-coverage-reporter-action@v1.3.0"
         with:
-          token: ${{ secrets.CODECOV_TOKEN }}
+          project-token: "${{ secrets.CODACY_PROJECT_TOKEN }}"
+          coverage-reports: "coverage.xml"
 
   tests:
     name: "PHPUnit tests"

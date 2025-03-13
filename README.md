@@ -2,7 +2,7 @@
 
 ![Packagist Version](https://img.shields.io/packagist/v/yethee/tiktoken)
 ![Build status](https://img.shields.io/github/actions/workflow/status/yethee/tiktoken-php/ci.yml?branch=master)
-[![codecov](https://codecov.io/github/yethee/tiktoken-php/graph/badge.svg)](https://codecov.io/github/yethee/tiktoken-php)
+![Code Coverage](https://app.codacy.com/project/badge/Coverage/49ec3803b480478caeca8903b7ff0a69?branch=master)
 ![License](https://img.shields.io/github/license/yethee/tiktoken-php)
 
 This is a port of the [tiktoken](https://github.com/openai/tiktoken).
