@@ -12,7 +12,7 @@ use Yethee\Tiktoken\Vocab\Vocab;
 
 use function array_map;
 use function array_merge;
-use function array_values;
+use function array_splice;
 use function count;
 use function implode;
 use function preg_last_error_msg;
@@ -175,8 +175,7 @@ final class Encoder implements Stringable
                 break;
             }
 
-            unset($parts[$partIndex + 1]);
-            $parts = array_values($parts);
+            array_splice($parts, $partIndex + 1, 1);
 
             $parts[$partIndex][1] = $getRank($parts, $partIndex);
 
