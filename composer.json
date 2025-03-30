@@ -45,6 +45,9 @@
     "cs-check": "phpcs",
     "cs-fix": "phpcbf",
     "test": "phpunit --colors=always --no-coverage",
-    "bench": "phpbench run -l dots --report=encode --retry-threshold=5 --profile=jit"
+    "bench": [
+      "Composer\\Config::disableProcessTimeout",
+      "phpbench run -l dots --report=agg_by_subject --report=enc_chart --profile=jit"
+    ]
   }
 }

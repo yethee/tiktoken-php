@@ -18,13 +18,6 @@
       <code><![CDATA[NonEmptyByteVector]]></code>
     </InvalidReturnType>
   </file>
-  <file src="tests/Benchmark/EncoderBench.php">
-    <MissingConstructor>
-      <code><![CDATA[$encoder]]></code>
-      <code><![CDATA[$text]]></code>
-      <code><![CDATA[$tokens]]></code>
-    </MissingConstructor>
-  </file>
   <file src="tests/Vocab/Loader/DefaultVocabLoaderTest.php">
     <ArgumentTypeCoercion>
       <code><![CDATA[$this->cacheDir->url()]]></code>

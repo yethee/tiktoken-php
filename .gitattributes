@@ -1,11 +1,14 @@
 /.cache          export-ignore
+/.docker         export-ignore
 /.github         export-ignore
 /tests           export-ignore
 /.editorconfig   export-ignore
 /.gitattributes  export-ignore
 /.gitignore      export-ignore
+/Makefile        export-ignore
 /phpbench.json   export-ignore
-/Cargo.*         export-ignore
+/*.lock          export-ignore
+/*.toml          export-ignore
 /*.rs            export-ignore
 /*.xml           export-ignore
 /*.xml.dist      export-ignore
