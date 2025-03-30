@@ -2,15 +2,13 @@
 
 declare(strict_types=1);
 
-namespace Yethee\Tiktoken\Tests;
+namespace Yethee\Tiktoken\Tests\Encoder;
 
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use Yethee\Tiktoken\Encoder;
-use Yethee\Tiktoken\EncoderProvider;
-use Yethee\Tiktoken\Vocab\Vocab;
 
-final class EncoderTest extends TestCase
+abstract class EncoderTestCase extends TestCase
 {
     /**
      * @param non-empty-string $encoding
@@ -19,7 +17,7 @@ final class EncoderTest extends TestCase
     #[DataProvider('provideDataForFlatTokenization')]
     public function testEncode(string $text, string $encoding, array $tokens): void
     {
-        $encoder = self::getEncoder($encoding);
+        $encoder = $this->getEncoder($encoding);
 
         self::assertSame($tokens, $encoder->encode($text));
     }
@@ -31,18 +29,21 @@ final class EncoderTest extends TestCase
     #[DataProvider('provideDataForFlatTokenization')]
     public function testDecode(string $text, string $encoding, array $tokens): void
     {
-        $encoder = self::getEncoder($encoding);
+        $encoder = $this->getEncoder($encoding);
 
         self::assertSame($text, $encoder->decode($tokens));
     }
 
     /**
-     * @param positive-int    $maxTokensPerChunk
-     * @param list<list<int>> $expected
+     * @param non-empty-string $encoding
+     * @param positive-int     $maxTokensPerChunk
+     * @param list<list<int>>  $expected
      */
     #[DataProvider('provideDataForChunkBasedTokenization')]
-    public function testEncodeInChunks(Encoder $encoder, string $text, int $maxTokensPerChunk, array $expected): void
+    public function testEncodeInChunks(string $encoding, string $text, int $maxTokensPerChunk, array $expected): void
     {
+        $encoder = $this->getEncoder($encoding);
+
         self::assertSame($expected, $encoder->encodeInChunks($text, $maxTokensPerChunk));
     }
 
@@ -72,7 +73,7 @@ final class EncoderTest extends TestCase
 
     /**
      * @return iterable<array{
-     *     Encoder,
+     *     non-empty-string,
      *     string,
      *     positive-int,
      *     list<list<int>>
@@ -83,7 +84,7 @@ final class EncoderTest extends TestCase
     public static function provideDataForChunkBasedTokenization(): iterable
     {
         yield 'p50k_base' => [
-            self::getEncoder('p50k_base'),
+            'p50k_base',
             '1 2 hello，world 3 4',
             3,
             [
@@ -94,7 +95,7 @@ final class EncoderTest extends TestCase
         ];
 
         yield 'cl100k_base' => [
-            self::getEncoder('cl100k_base'),
+            'cl100k_base',
             '1 2 hello，world 3 4',
             5,
             [
@@ -106,12 +107,5 @@ final class EncoderTest extends TestCase
     }
 
     /** @param non-empty-string $encoding */
-    private static function getEncoder(string $encoding): Encoder
-    {
-        return new Encoder(
-            $encoding,
-            Vocab::fromFile(__DIR__ . '/Fixtures/' . $encoding . '.tiktoken'),
-            EncoderProvider::ENCODINGS[$encoding]['pat'],
-        );
-    }
+    abstract protected function getEncoder(string $encoding): Encoder;
 }

@@ -26,7 +26,7 @@ final class EncoderProviderTest extends TestCase
 
         $encoder = $provider->getForModel($modelName);
 
-        self::assertSame($encoding, $encoder->name);
+        self::assertSame($encoding, $encoder->getEncoding());
     }
 
     public function testEncode(): void
