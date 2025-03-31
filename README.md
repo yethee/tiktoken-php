@@ -50,21 +50,6 @@ $encProvider->setVocabCache('/path/to/cache');
 // Using the provider
 ```
 
-### Disable cache
-
-You can disable the cache, if there are reasons for this,
-in one of the following ways:
-
-* Set an empty string for the environment variable `TIKTOKEN_CACHE_DIR`.
-* Programmatically:
-
-```php
-use Yethee\Tiktoken\EncoderProvider;
-
-$encProvider = new EncoderProvider();
-$encProvider->setVocabCache(null); // disable the cache
-```
-
 ## Lib mode
 
 **Experimental**
