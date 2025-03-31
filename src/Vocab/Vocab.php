@@ -8,7 +8,7 @@ use Countable;
 use InvalidArgumentException;
 use OutOfBoundsException;
 use Override;
-use RuntimeException;
+use Yethee\Tiktoken\Exception\IOError;
 use Yethee\Tiktoken\Exception\ParseError;
 use Yethee\Tiktoken\Util\EncodeUtil;
 
@@ -49,17 +49,22 @@ final class Vocab implements Countable
         }
     }
 
-    /** @param non-empty-string $bpeFile */
+    /**
+     * @param non-empty-string $bpeFile
+     *
+     * @throws IOError
+     * @throws ParseError
+     */
     public static function fromFile(string $bpeFile): self
     {
         if (! file_exists($bpeFile)) {
-            throw new RuntimeException(sprintf('File "%s" does not exist', $bpeFile));
+            throw new IOError(sprintf('File "%s" does not exist', $bpeFile));
         }
 
         $stream = fopen($bpeFile, 'rb');
 
         if ($stream === false) {
-            throw new RuntimeException(sprintf('Could not open file: %s', $bpeFile));
+            throw new IOError(sprintf('Could not open file: %s', $bpeFile));
         }
 
         try {
@@ -73,6 +78,8 @@ final class Vocab implements Countable
      * @param resource $stream
      *
      * @return static
+     *
+     * @throws ParseError
      */
     public static function fromStream($stream): self
     {

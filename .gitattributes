@@ -1,12 +1,17 @@
-/.cache export-ignore
-/.github export-ignore
-/tests export-ignore
-/.editorconfig export-ignore
-/.gitattributes export-ignore
-/.gitignore export-ignore
-/phpbench.json export-ignore
-/*.xml export-ignore
-/*.xml.dist export-ignore
+/.cache          export-ignore
+/.docker         export-ignore
+/.github         export-ignore
+/tests           export-ignore
+/.editorconfig   export-ignore
+/.gitattributes  export-ignore
+/.gitignore      export-ignore
+/Makefile        export-ignore
+/phpbench.json   export-ignore
+/*.lock          export-ignore
+/*.toml          export-ignore
+/*.rs            export-ignore
+/*.xml           export-ignore
+/*.xml.dist      export-ignore
 
 # Auto detect text files and perform LF normalization
 * text=auto

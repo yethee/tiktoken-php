@@ -5,11 +5,11 @@ declare(strict_types=1);
 namespace Yethee\Tiktoken\Vocab\Loader;
 
 use Override;
-use RuntimeException;
+use Yethee\Tiktoken\Exception\IOError;
 use Yethee\Tiktoken\Vocab\Vocab;
 use Yethee\Tiktoken\Vocab\VocabLoader;
 
-use function assert;
+use function error_get_last;
 use function fclose;
 use function file_exists;
 use function fopen;
@@ -22,82 +22,86 @@ use function is_dir;
 use function is_resource;
 use function is_writable;
 use function mkdir;
-use function rewind;
 use function sha1;
 use function sprintf;
 use function stream_copy_to_stream;
-use function stream_get_meta_data;
 
 use const DIRECTORY_SEPARATOR;
 
 final class DefaultVocabLoader implements VocabLoader
 {
-    public function __construct(private string|null $cacheDir = null)
+    /** @param non-empty-string $cacheDir */
+    public function __construct(private readonly string $cacheDir)
     {
     }
 
     #[Override]
     public function load(string $uri, string|null $checksum = null): Vocab
     {
-        $cacheFile = $this->cacheDir !== null ? $this->cacheDir . DIRECTORY_SEPARATOR . sha1($uri) : null;
+        return Vocab::fromFile($this->loadFile($uri, $checksum));
+    }
 
-        if ($cacheFile !== null) {
-            if (file_exists($cacheFile) && $this->checkHash($cacheFile, $checksum)) {
-                return Vocab::fromFile($cacheFile);
-            }
+    #[Override]
+    public function loadFile(string $uri, string|null $checksum = null): string
+    {
+        $cacheFile = $this->cacheDir . DIRECTORY_SEPARATOR . sha1($uri);
 
-            assert($this->cacheDir !== null);
+        if (file_exists($cacheFile) && $this->checkHash($cacheFile, $checksum)) {
+            return $cacheFile;
+        }
 
-            if (! is_dir($this->cacheDir) && ! @mkdir($this->cacheDir, 0750, true)) {
-                throw new RuntimeException(sprintf(
-                    'Directory does not exist and cannot be created: %s',
-                    $this->cacheDir,
-                ));
-            }
+        if (! is_dir($this->cacheDir) && ! @mkdir($this->cacheDir, 0750, true)) {
+            throw new IOError(sprintf(
+                'Directory does not exist and cannot be created: %s',
+                $this->cacheDir,
+            ));
+        }
 
-            if (! is_writable($this->cacheDir)) {
-                throw new RuntimeException(sprintf('Directory is not writable: %s', $this->cacheDir));
-            }
+        if (! is_writable($this->cacheDir)) {
+            throw new IOError(sprintf('Directory is not writable: %s', $this->cacheDir));
         }
 
         $stream = fopen($uri, 'r');
 
         if ($stream === false) {
-            throw new RuntimeException(sprintf('Could not open stream for URI: %s', $uri));
+            throw new IOError(sprintf('Could not open stream for URI: %s', $uri));
         }
 
         try {
-            if ($checksum !== null && $this->isRewindable($stream)) {
-                if (! $this->checkHash($stream, $checksum)) {
-                    throw new RuntimeException(sprintf(
-                        'Checksum failed. Could not load vocab from URI: %s',
-                        $uri,
-                    ));
-                }
+            $cacheStream = fopen($cacheFile, 'w+');
 
-                rewind($stream);
+            if ($cacheStream === false) {
+                throw new IOError(sprintf('Could not open file for write: %s', $cacheFile));
             }
 
-            if ($cacheFile !== null) {
-                $cacheStream = fopen($cacheFile, 'w+');
+            try {
+                if (stream_copy_to_stream($stream, $cacheStream) === false) {
+                    $message = 'Could not copy source stream to file';
+                    $lastError = error_get_last();
 
-                if ($cacheStream === false) {
-                    throw new RuntimeException(sprintf('Could not open file for write: %s', $cacheFile));
+                    if ($lastError !== null) {
+                        $message .= ': ' . $lastError['message'];
+                    }
+
+                    throw new IOError($message);
                 }
 
-                try {
-                    stream_copy_to_stream($stream, $cacheStream);
-
-                    return Vocab::fromStream($cacheStream);
-                } finally {
-                    fclose($cacheStream);
+                if ($checksum !== null) {
+                    if (! $this->checkHash($cacheFile, $checksum)) {
+                        throw new IOError(sprintf(
+                            'Checksum failed. Could not load vocab from URI: %s',
+                            $uri,
+                        ));
+                    }
                 }
+            } finally {
+                fclose($cacheStream);
             }
-
-            return Vocab::fromStream($stream);
         } finally {
             fclose($stream);
         }
+
+        return $cacheFile;
     }
 
     /** @param string|resource $resource */
@@ -118,13 +122,5 @@ final class DefaultVocabLoader implements VocabLoader
         $hash = hash_final($ctx);
 
         return hash_equals($hash, $expectedHash);
-    }
-
-    /** @param resource $stream */
-    private function isRewindable($stream): bool
-    {
-        $meta = stream_get_meta_data($stream);
-
-        return $meta['seekable'];
     }
 }

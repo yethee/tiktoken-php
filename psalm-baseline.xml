@@ -1,5 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <files psalm-version="6.8.9@e856423a5dc38d65e56b5792750c557277afe393">
+  <file src="src/Encoder/LibEncoder.php">
+    <UndefinedMethod>
+      <code><![CDATA[$ranks]]></code>
+      <code><![CDATA[$ranks]]></code>
+    </UndefinedMethod>
+    <UndefinedPropertyFetch>
+      <code><![CDATA[$tokens->data]]></code>
+      <code><![CDATA[$tokens->len]]></code>
+    </UndefinedPropertyFetch>
+  </file>
   <file src="src/Util/EncodeUtil.php">
     <InvalidReturnStatement>
       <code><![CDATA[array_map(hexdec(...), str_split(bin2hex($text), 2))]]></code>
@@ -8,11 +18,10 @@
       <code><![CDATA[NonEmptyByteVector]]></code>
     </InvalidReturnType>
   </file>
-  <file src="tests/Benchmark/EncoderBench.php">
-    <MissingConstructor>
-      <code><![CDATA[$encoder]]></code>
-      <code><![CDATA[$text]]></code>
-      <code><![CDATA[$tokens]]></code>
-    </MissingConstructor>
+  <file src="tests/Vocab/Loader/DefaultVocabLoaderTest.php">
+    <ArgumentTypeCoercion>
+      <code><![CDATA[$this->cacheDir->url()]]></code>
+      <code><![CDATA[$this->cacheDir->url()]]></code>
+    </ArgumentTypeCoercion>
   </file>
 </files>

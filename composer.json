@@ -16,6 +16,9 @@
     "psalm/plugin-phpunit": "^0.19.2",
     "vimeo/psalm": "6.8.9"
   },
+  "suggest": {
+    "ext-ffi": "To allow use LibEncoder"
+  },
   "autoload": {
     "psr-4": {
       "Yethee\\Tiktoken\\": "src"
@@ -42,6 +45,9 @@
     "cs-check": "phpcs",
     "cs-fix": "phpcbf",
     "test": "phpunit --colors=always --no-coverage",
-    "bench": "phpbench run -l dots --report=encode --retry-threshold=5 --profile=jit"
+    "bench": [
+      "Composer\\Config::disableProcessTimeout",
+      "phpbench run -l dots --report=agg_by_subject --report=enc_chart --profile=jit"
+    ]
   }
 }

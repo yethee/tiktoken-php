@@ -1,0 +1,19 @@
+[package]
+name = "tiktoken-php"
+version = "0.1.0"
+edition = "2024"
+
+[lib]
+crate-type = ["cdylib"]
+
+[profile.release]
+opt-level = "z"
+lto = true
+codegen-units = 1
+
+[dependencies]
+anyhow = "1.0.97"
+base64 = "0.22.1"
+ffi_helpers = "0.3.0"
+rustc-hash = "1.1.0"
+tiktoken-rs = "0.6.0"

@@ -16,10 +16,24 @@
   },
   "storage.xml_storage_path": ".cache/phpbench/storage",
   "report.generators": {
-    "encode": {
+    "agg_by_subject": {
       "generator": "expression",
       "break": ["subject"],
       "cols": ["benchmark", "subject", "set", "revs", "its", "mem_peak", "mode", "rstdev"]
+    },
+    "enc_chart": {
+      "generator": "component",
+      "partition": ["subject_name", "variant_params['fixture']"],
+      "components": [
+        {
+          "component": "bar_chart_aggregate",
+          "title": "{{ first(frame['subject_name']) }}({{ first(frame['variant_params'])['fixture'] }})",
+          "x_partition": ["variant_params['encoding']"],
+          "bar_partition": ["first(subject_groups)"],
+          "y_expr": "mode(partition['result_time_avg']) as time",
+          "y_axes_label": "yValue as time"
+        }
+      ]
     }
   }
 }

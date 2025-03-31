@@ -10,3 +10,6 @@ insert_final_newline = true
 
 [*.{json,yml,xml,xml.dist}]
 indent_size = 2
+
+[Makefile]
+indent_style = tab

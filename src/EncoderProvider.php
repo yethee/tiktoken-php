@@ -4,13 +4,18 @@ declare(strict_types=1);
 
 namespace Yethee\Tiktoken;
 
+use FFI;
 use InvalidArgumentException;
 use Override;
+use RuntimeException;
 use Symfony\Contracts\Service\ResetInterface;
+use Yethee\Tiktoken\Encoder\LibEncoder;
+use Yethee\Tiktoken\Encoder\NativeEncoder;
 use Yethee\Tiktoken\Vocab\Loader\DefaultVocabLoader;
 use Yethee\Tiktoken\Vocab\Vocab;
 use Yethee\Tiktoken\Vocab\VocabLoader;
 
+use function class_exists;
 use function getenv;
 use function sprintf;
 use function str_starts_with;
@@ -24,27 +29,27 @@ final class EncoderProvider implements ResetInterface
         'r50k_base' => [
             'vocab' => 'https://openaipublic.blob.core.windows.net/encodings/r50k_base.tiktoken',
             'hash' => '306cd27f03c1a714eca7108e03d66b7dc042abe8c258b44c199a7ed9838dd930',
-            'pat' => '/\'s|\'t|\'re|\'ve|\'m|\'ll|\'d| ?\p{L}+| ?\p{N}+| ?[^\s\p{L}\p{N}]+|\s+(?!\S)|\s+/u',
+            'pat' => '\'s|\'t|\'re|\'ve|\'m|\'ll|\'d| ?\p{L}+| ?\p{N}+| ?[^\s\p{L}\p{N}]+|\s+(?!\S)|\s+',
         ],
         'p50k_base' => [
             'vocab' => 'https://openaipublic.blob.core.windows.net/encodings/p50k_base.tiktoken',
             'hash' => '94b5ca7dff4d00767bc256fdd1b27e5b17361d7b8a5f968547f9f23eb70d2069',
-            'pat' => '/\'s|\'t|\'re|\'ve|\'m|\'ll|\'d| ?\p{L}+| ?\p{N}+| ?[^\s\p{L}\p{N}]+|\s+(?!\S)|\s+/u',
+            'pat' => '\'s|\'t|\'re|\'ve|\'m|\'ll|\'d| ?\p{L}+| ?\p{N}+| ?[^\s\p{L}\p{N}]+|\s+(?!\S)|\s+',
         ],
         'p50k_edit' => [
             'vocab' => 'https://openaipublic.blob.core.windows.net/encodings/p50k_base.tiktoken',
             'hash' => '94b5ca7dff4d00767bc256fdd1b27e5b17361d7b8a5f968547f9f23eb70d2069',
-            'pat' => '/\'s|\'t|\'re|\'ve|\'m|\'ll|\'d| ?\p{L}+| ?\p{N}+| ?[^\s\p{L}\p{N}]+|\s+(?!\S)|\s+/u',
+            'pat' => '\'s|\'t|\'re|\'ve|\'m|\'ll|\'d| ?\p{L}+| ?\p{N}+| ?[^\s\p{L}\p{N}]+|\s+(?!\S)|\s+',
         ],
         'cl100k_base' => [
             'vocab' => 'https://openaipublic.blob.core.windows.net/encodings/cl100k_base.tiktoken',
             'hash' => '223921b76ee99bde995b7ff738513eef100fb51d18c93597a113bcffe865b2a7',
-            'pat' => '/(?i:\'s|\'t|\'re|\'ve|\'m|\'ll|\'d)|[^\r\n\p{L}\p{N}]?\p{L}+|\p{N}{1,3}| ?[^\s\p{L}\p{N}]+[\r\n]*|\s*[\r\n]+|\s+(?!\S)|\s+/u',
+            'pat' => '(?i:\'s|\'t|\'re|\'ve|\'m|\'ll|\'d)|[^\r\n\p{L}\p{N}]?\p{L}+|\p{N}{1,3}| ?[^\s\p{L}\p{N}]+[\r\n]*|\s*[\r\n]+|\s+(?!\S)|\s+',
         ],
         'o200k_base' => [
             'vocab' => 'https://openaipublic.blob.core.windows.net/encodings/o200k_base.tiktoken',
             'hash' => '446a9538cb6c348e3516120d7c08b09f57c36495e2acfffe59a5bf8b0cfb1a2d',
-            'pat' => '/[^\r\n\p{L}\p{N}]?[\p{Lu}\p{Lt}\p{Lm}\p{Lo}\p{M}]*[\p{Ll}\p{Lm}\p{Lo}\p{M}]+(?i:\'s|\'t|\'re|\'ve|\'m|\'ll|\'d)?|[^\r\n\p{L}\p{N}]?[\p{Lu}\p{Lt}\p{Lm}\p{Lo}\p{M}]+[\p{Ll}\p{Lm}\p{Lo}\p{M}]*(?i:\'s|\'t|\'re|\'ve|\'m|\'ll|\'d)?|\p{N}{1,3}| ?[^\s\p{L}\p{N}]+[\r\n\/]*|\s*[\r\n]+|\s+(?!\S)|\s+/u',
+            'pat' => '[^\r\n\p{L}\p{N}]?[\p{Lu}\p{Lt}\p{Lm}\p{Lo}\p{M}]*[\p{Ll}\p{Lm}\p{Lo}\p{M}]+(?i:\'s|\'t|\'re|\'ve|\'m|\'ll|\'d)?|[^\r\n\p{L}\p{N}]?[\p{Lu}\p{Lt}\p{Lm}\p{Lo}\p{M}]+[\p{Ll}\p{Lm}\p{Lo}\p{M}]*(?i:\'s|\'t|\'re|\'ve|\'m|\'ll|\'d)?|\p{N}{1,3}| ?[^\s\p{L}\p{N}]+[\r\n\/]*|\s*[\r\n]+|\s+(?!\S)|\s+',
         ],
     ];
     private const MODEL_PREFIX_TO_ENCODING = [
@@ -98,7 +103,9 @@ final class EncoderProvider implements ResetInterface
     ];
 
     private VocabLoader|null $vocabLoader = null;
-    private string|null $vocabCacheDir;
+
+    /** @var non-empty-string */
+    private string $vocabCacheDir;
 
     /** @var array<non-empty-string, Encoder> */
     private array $encoders = [];
@@ -106,15 +113,19 @@ final class EncoderProvider implements ResetInterface
     /** @var array<string, Vocab> */
     private array $vocabs = [];
 
-    public function __construct()
+    public function __construct(private bool $useLib = false)
     {
+        if ($useLib && ! class_exists(FFI::class)) {
+            throw new RuntimeException('Required FFI extension is not loaded');
+        }
+
         $cacheDir = getenv('TIKTOKEN_CACHE_DIR');
 
-        if ($cacheDir === false) {
+        if ($cacheDir === false || $cacheDir === '') {
             $cacheDir = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'tiktoken';
         }
 
-        $this->vocabCacheDir = $cacheDir !== '' ? $cacheDir : null;
+        $this->vocabCacheDir = $cacheDir;
     }
 
     /** @param non-empty-string $model */
@@ -143,18 +154,22 @@ final class EncoderProvider implements ResetInterface
         if (! isset($this->encoders[$encodingName])) {
             $options = self::ENCODINGS[$encodingName];
 
-            return $this->encoders[$encodingName] = new Encoder(
-                $encodingName,
-                $this->getVocab($encodingName),
-                $options['pat'],
-            );
+            $encoder = $this->useLib
+                ? new LibEncoder(
+                    $encodingName,
+                    $this->getVocabLoader()->loadFile($options['vocab'], $options['hash'] ?? null),
+                    $options['pat'],
+                )
+                : new NativeEncoder($encodingName, $this->getVocab($encodingName), sprintf('/%s/u', $options['pat']));
+
+            return $this->encoders[$encodingName] = $encoder;
         }
 
         return $this->encoders[$encodingName];
     }
 
-    /** @param non-empty-string|null $cacheDir */
-    public function setVocabCache(string|null $cacheDir): void
+    /** @param non-empty-string $cacheDir */
+    public function setVocabCache(string $cacheDir): void
     {
         $this->vocabCacheDir = $cacheDir;
         $this->vocabLoader = null;
@@ -173,19 +188,22 @@ final class EncoderProvider implements ResetInterface
         $this->vocabs = [];
     }
 
+    private function getVocabLoader(): VocabLoader
+    {
+        if ($this->vocabLoader === null) {
+            $this->vocabLoader = new DefaultVocabLoader($this->vocabCacheDir);
+        }
+
+        return $this->vocabLoader;
+    }
+
     private function getVocab(string $encodingName): Vocab
     {
         if (isset($this->vocabs[$encodingName])) {
             return $this->vocabs[$encodingName];
         }
 
-        $loader = $this->vocabLoader;
-
-        if ($loader === null) {
-            $loader = $this->vocabLoader = new DefaultVocabLoader($this->vocabCacheDir);
-        }
-
-        return $this->vocabs[$encodingName] = $loader->load(
+        return $this->vocabs[$encodingName] = $this->getVocabLoader()->load(
             self::ENCODINGS[$encodingName]['vocab'],
             self::ENCODINGS[$encodingName]['hash'] ?? null,
         );
