@@ -94,7 +94,7 @@ Copy binary from `target/release`:
 
 ### Benchmark
 
-You can see benchmark result in #27 or run it locally:
+You can see benchmark result in [#27](https://github.com/yethee/tiktoken-php/pull/27) or run it locally:
 
 ```shell
 composer bench
@@ -102,7 +102,7 @@ composer bench
 
 ### TODO
 
-* Add implementation for `Yethee\Tiktoken\Encoder::encodeInChunks()` method
+* Add implementation for `Yethee\Tiktoken\Encoder\LibEncoder::encodeInChunks()` method
 
 ## Limitations
 
