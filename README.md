@@ -81,6 +81,7 @@ You need to provide path to the lib before using the provider. There are several
 
 ```shell
 git clone git@github.com:yethee/tiktoken-php.git
+cd tiktoken-php
 cargo build --release
 ```
 
