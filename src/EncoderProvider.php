@@ -55,15 +55,20 @@ final class EncoderProvider implements ResetInterface
     private const MODEL_PREFIX_TO_ENCODING = [
         'o1-' => 'o200k_base',
         'o3-' => 'o200k_base',
+        'o4-mini-' => 'o200k_base',
         'chatgpt-4o-' => 'o200k_base',
+        'gpt-5-' => 'o200k_base',
         'gpt-4-' => 'cl100k_base',
         'gpt-4.1-' => 'o200k_base',
+        'gpt-4.5-' => 'o200k_base',
         'gpt-4o-' => 'o200k_base',
         'gpt-3.5-turbo-' => 'cl100k_base',
+        'gpt-oss-' => 'o200k_base',
     ];
     private const MODEL_TO_ENCODING = [
         'o1' => 'o200k_base',
         'o3' => 'o200k_base',
+        'o4-mini' => 'o200k_base',
         'gpt-4' => 'cl100k_base',
         'gpt-4.1' => 'o200k_base',
         'gpt-4o' => 'o200k_base',
