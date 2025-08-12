@@ -69,6 +69,7 @@ final class EncoderProvider implements ResetInterface
         'o1' => 'o200k_base',
         'o3' => 'o200k_base',
         'o4-mini' => 'o200k_base',
+        'gpt-5' => 'o200k_base',
         'gpt-4' => 'cl100k_base',
         'gpt-4.1' => 'o200k_base',
         'gpt-4o' => 'o200k_base',
