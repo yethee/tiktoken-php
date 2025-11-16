@@ -114,7 +114,7 @@ jobs:
         run: "vendor/bin/phpunit --coverage-clover=coverage.xml"
 
       - name: "Upload coverage reports to Codacy"
-        if: ${{ !github.event.pull_request.head.repo.fork }}
+        if: ${{ !github.event.repository.fork }}
         uses: "codacy/codacy-coverage-reporter-action@v1.3.0"
         with:
           project-token: "${{ secrets.CODACY_PROJECT_TOKEN }}"
