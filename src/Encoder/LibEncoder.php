@@ -34,6 +34,7 @@ use const PATH_SEPARATOR;
 use const PHP_OS_FAMILY;
 use const PHP_SAPI;
 
+/** @experimental */
 final class LibEncoder implements Encoder, Stringable
 {
     private const FFI_SCOPE = 'tiktoken';
