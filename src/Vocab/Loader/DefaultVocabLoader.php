@@ -22,9 +22,12 @@ use function is_dir;
 use function is_resource;
 use function is_writable;
 use function mkdir;
+use function rename;
 use function sha1;
 use function sprintf;
 use function stream_copy_to_stream;
+use function uniqid;
+use function unlink;
 
 use const DIRECTORY_SEPARATOR;
 
@@ -68,15 +71,27 @@ final class DefaultVocabLoader implements VocabLoader
         }
 
         try {
-            $cacheStream = fopen($cacheFile, 'w+');
+            $tmpFile = $cacheFile . '_' . uniqid('tmp', more_entropy: true);
+            $cacheStream = fopen($tmpFile, 'w+');
 
             if ($cacheStream === false) {
-                throw new IOError(sprintf('Could not open file for write: %s', $cacheFile));
+                throw new IOError(sprintf('Could not open file for write: %s', $tmpFile));
             }
 
             try {
                 if (stream_copy_to_stream($stream, $cacheStream) === false) {
                     $message = 'Could not copy source stream to file';
+                    $lastError = error_get_last();
+
+                    if ($lastError !== null) {
+                        $message .= ': ' . $lastError['message'];
+                    }
+
+                    throw new IOError($message);
+                }
+
+                if (rename($tmpFile, $cacheFile) === false) {
+                    $message = 'Could not rename file';
                     $lastError = error_get_last();
 
                     if ($lastError !== null) {
@@ -96,6 +111,10 @@ final class DefaultVocabLoader implements VocabLoader
                 }
             } finally {
                 fclose($cacheStream);
+
+                if (file_exists($tmpFile)) {
+                    unlink($tmpFile);
+                }
             }
         } finally {
             fclose($stream);
