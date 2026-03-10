@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Yethee\Tiktoken\Tests;
 
 use org\bovigo\vfs\vfsStream;
+use org\bovigo\vfs\vfsStreamFile;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use Yethee\Tiktoken\EncoderProvider;
@@ -46,7 +47,7 @@ final class EncoderProviderTest extends TestCase
         $cache = vfsStream::setup('cache');
         $vocabCacheFilename = hash('sha1', EncoderProvider::ENCODINGS['p50k_base']['vocab']);
 
-        $cacheFile = vfsStream::newFile($vocabCacheFilename)
+        vfsStream::newFile($vocabCacheFilename)
             ->withContent('broken cache')
             ->at($cache);
 
@@ -56,6 +57,9 @@ final class EncoderProviderTest extends TestCase
 
         $provider->get('p50k_base');
 
+        $cacheFile = $cache->getChild($vocabCacheFilename);
+
+        self::assertInstanceOf(vfsStreamFile::class, $cacheFile);
         self::assertNotEquals('broken cache', $cacheFile->getContent());
     }
 
